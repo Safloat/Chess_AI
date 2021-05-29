@@ -90,7 +90,7 @@ class game_state:
                     val_mov.append(pos-9)
                 if pos%7!=0 :
                     val_mov.append(pos-7)
-        self.verification_of_moves(color, val_moves)
+        self.verification_of_moves(color, val_mov)
         return val_mov
 
     def bishopmoves(self, pos, color):
