@@ -17,7 +17,7 @@ def loadImages():
     pieces = ['wp', 'wR', 'wN', 'wB', 'wK', 'wQ', 'bp', 'bR', 'bN', 'bB', 'bK', 'bQ']
 
     for piece in pieces:
-        IMAGES[piece] = p.transform.scale(p.image.load("images/" + piece + ".png")) 
+        IMAGES[piece] = p.transform.scale(p.image.load("images/" + piece + ".png"), (SQ_SIZE, SQ_SIZE)) 
     
 
 def main():
@@ -30,7 +30,7 @@ def main():
     screen.fill(p.Color("white"))
 
     game_state = game.get_state()
-    #loadImages()
+    loadImages()
     running = True
 
     while running:
