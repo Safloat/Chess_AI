@@ -96,8 +96,8 @@ class game_state:
         cpos=pos
         #loop for upperleft
         while 1:
-            cpos=cpos-9
-            if cpos>=0 and cpos%8 != 0:
+            cpos = cpos - 9
+            if cpos >= 0 and cpos % 8 != 0:
                 val_moves.append()
             else:
                 break
