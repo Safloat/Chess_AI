@@ -24,7 +24,7 @@ def main():
 
     p.init()
     print("inited")
-    screen = p.display.set_mode()
+    screen = p.display.set_mode((WIDTH, HEIGHT))
     clock = p.time.Clock()
 
     screen.fill(p.Color("white"))
