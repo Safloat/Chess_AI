@@ -14,20 +14,21 @@ MAX_FPS = 30
 
 IMAGES = {}
 
-pieces_image_reference = defaultdict(list)
+pieces_image_reference = {}
     
-pieces_image_reference['wp'] = game_state.piece.white_pawn 
-pieces_image_reference['wR'] = game_state.piece.white_rook
-pieces_image_reference['wN'] = game_state.piece.white_knight 
-pieces_image_reference['wB'] = game_state.piece.white_bishop 
-pieces_image_reference['wK'] = [game_state.piece.white_king]
-pieces_image_reference['wQ'] = [game_state.piece.white_queen]
-pieces_image_reference['bp'] = game_state.piece.black_pawn
-pieces_image_reference['bR'] = game_state.piece.black_rook
-pieces_image_reference['bN'] = game_state.piece.black_knight
-pieces_image_reference['bB'] = game_state.piece.black_bishop
-pieces_image_reference['bK'] = [game_state.piece.black_king]
-pieces_image_reference['bQ'] = [game_state.piece.black_queen]
+pieces_image_reference[game_state.piece.white | game_state.piece.pawn] = 'wp'  
+pieces_image_reference[game_state.piece.white | game_state.piece.rook] = 'wR'  
+pieces_image_reference[game_state.piece.white | game_state.piece.knight] = 'wN' 
+pieces_image_reference[game_state.piece.white | game_state.piece.bishop] = 'wB' 
+pieces_image_reference[game_state.piece.white | game_state.piece.king] = 'wK' 
+pieces_image_reference[game_state.piece.white | game_state.piece.queen] = 'wQ' 
+
+pieces_image_reference[game_state.piece.black | game_state.piece.pawn] = 'bp' 
+pieces_image_reference[game_state.piece.black | game_state.piece.rook] = 'bR'  
+pieces_image_reference[game_state.piece.black | game_state.piece.knight] = 'bN' 
+pieces_image_reference[game_state.piece.black | game_state.piece.bishop] = 'bB'  
+pieces_image_reference[game_state.piece.black | game_state.piece.king] = 'bK' 
+pieces_image_reference[game_state.piece.black | game_state.piece.queen] = 'bQ' 
 
 
 
@@ -36,8 +37,8 @@ def loadImages():
     print("got here")
     
 
-    for piece, value in pieces_image_reference.items():
-        IMAGES[piece] = p.transform.scale(p.image.load("images/" + piece + ".png"), (SQ_SIZE, SQ_SIZE)) 
+    for piece, sprite in pieces_image_reference.items():
+        IMAGES[sprite] = p.transform.scale(p.image.load("images/" + sprite + ".png"), (SQ_SIZE, SQ_SIZE)) 
     
 
 def main():
@@ -86,11 +87,8 @@ def drawPieces(screen, curr_state):
     for r in range(DIMENSION):
         for c in range(DIMENSION):
             if curr_state[r*DIMENSION + c] >= 0:
-                for image, values in pieces_image_reference.items():
-                    #print(curr_state)
-                    if np.isin(curr_state[r*DIMENSION + c],values):
-                        screen.blit(IMAGES[image], p.Rect(c * SQ_SIZE, r * SQ_SIZE, SQ_SIZE, SQ_SIZE))
-                        break
+                image = pieces_image_reference[curr_state[r*DIMENSION + c]]
+                screen.blit(IMAGES[image], p.Rect(c * SQ_SIZE, r * SQ_SIZE, SQ_SIZE, SQ_SIZE))
                 
     
 
