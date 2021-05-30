@@ -80,10 +80,11 @@ class game_state:
         val_mov=[]
         if pos > 7 and pos < 56:
             if color == piece.black:
-                if game_state.curr_board[pos + 16] < 0 or game_state.curr_board[pos + 8] < 0:
+                if game_state.curr_board[pos + 16] < 0:
                     if pos // 8 == 1:
                         val_mov.append(pos+16)
                         #en passant check  
+                if game_state.curr_board[pos + 8] < 0:
                     if pos < 56:
                         val_mov.append(pos+8)
                 if game_state.curr_board[pos + 7] >= 0 and piece.is_enemy(game_state.curr_board[pos + 7], color): 
@@ -94,10 +95,11 @@ class game_state:
                         val_mov.append(pos+9)
                     
             if color == piece.white:
-                if game_state.curr_board[pos - 16] < 0 or game_state.curr_board[pos - 8] < 0:
+                if game_state.curr_board[pos - 16] < 0:
                     if pos // 8 == 6:
                         val_mov.append(pos-16)
                             #en passant check
+                if game_state.curr_board[pos - 8] < 0:
                     if pos>7:
                         val_mov.append(pos-8)
                 if game_state.curr_board[pos - 9] >= 0 and piece.is_enemy(game_state.curr_board[pos - 9], color): 
