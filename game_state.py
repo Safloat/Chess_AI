@@ -16,6 +16,15 @@ class piece:
     white = 0b01000  
     black = 0b10000
 
+    def color(_piece):
+        if _piece >> 3 == piece.white >> 3:
+            return piece.white
+        else:
+            return piece.black
+    
+    def is_enemy(p1, p2):
+        return piece.color(p1) != piece.color(p2)
+        
 
 
 class game_state:
