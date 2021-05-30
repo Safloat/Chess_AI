@@ -133,7 +133,7 @@ def get_valid_moves(selected_piece):
         elif piece.rank(selected_piece[0]) == piece.bishop:
             moves = game_state.bishopmoves(selected_piece[1], piece.color(selected_piece[0]))
         elif piece.rank(selected_piece[0]) == piece.knight:
-            moves = game_state.rookmoves(selected_piece[1], piece.color(selected_piece[0]))
+            moves = game_state.knightmoves(selected_piece[1], piece.color(selected_piece[0]))
         elif piece.rank(selected_piece[0]) == piece.pawn:
             moves = game_state.pawnmoves(selected_piece[1], piece.color(selected_piece[0]))
     return moves
