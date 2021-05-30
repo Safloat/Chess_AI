@@ -354,5 +354,5 @@ class game_state:
     def verification_of_moves(color, moves):
         
         for i, move in enumerate(moves):
-            if game_state.curr_board[move] >= 0 and (game_state.curr_board[move] & color) == color:
+            if game_state.curr_board[move] >= 0 and not piece.enemy(game_state.curr_board[move],color):
                 moves.pop(i)
