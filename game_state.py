@@ -128,8 +128,8 @@ class game_state:
                         val_moves.append(cpos)
                     if cpos % 8 == 0:
                         break
-                else:
-                    break
+            else:
+                break
         cpos=pos
         #loop for upper right
         while 1:
@@ -147,8 +147,8 @@ class game_state:
                         val_moves.append(cpos)
                     if (cpos+1) % 8 == 0:
                         break
-                else:
-                    break
+            else:
+                break
             
         cpos=pos
         #loop for lower right
@@ -167,8 +167,8 @@ class game_state:
                         val_moves.append(cpos)
                     if (cpos + 1) % 8 == 0:
                         break
-                else:
-                    break
+            else:
+                break
         cpos=pos
         #loop for lower left
         while 1:
@@ -186,8 +186,8 @@ class game_state:
                         val_moves.append(cpos)
                     if cpos % 8 == 0:
                         break
-                else:
-                    break
+            else:
+                break
         return val_moves
 
     def kingmoves(pos, color):
