@@ -11,6 +11,12 @@ WIDTH = HEIGHT = 512
 DIMENSION = 8
 SQ_SIZE = HEIGHT // DIMENSION
 
+BOARD_LIGHT = "bisque4"
+BOARD_DARK = "blanchedalmond"
+BOARD_HIGHLIGHT = "white"
+BOARD_POSSIBLE_MOVE = "brown"
+
+
 MAX_FPS = 60
 
 IMAGES = {}
@@ -68,6 +74,7 @@ def main():
 
     selected_piece = None
 
+    moves = None
     while running:
         
         possible_piece = get_square_under_mouse(game_state.curr_board)
@@ -79,16 +86,21 @@ def main():
                 if not selected_piece:
                     if possible_piece[0] >= 0:
                         selected_piece = possible_piece
+                        moves = get_valid_moves(selected_piece)
                         game_state.curr_board[selected_piece[1]] = -1
-                elif (game_state.curr_board[possible_piece[1]] >= 0 and piece.is_enemy(possible_piece[0], selected_piece[0])) \
-                or game_state.curr_board[possible_piece[1]] < 0:
+                elif ((game_state.curr_board[possible_piece[1]] >= 0 and piece.is_enemy(possible_piece[0], selected_piece[0])) \
+                or game_state.curr_board[possible_piece[1]] < 0)\
+                and possible_piece[1] in moves:
                     game_state.curr_board[selected_piece[1]] = -1
                     game_state.curr_board[possible_piece[1]] = selected_piece[0]
                     selected_piece = None
+                    moves = None
 
         
-        drawGameState(screen, curr_state)
+        drawBoard(screen)
+        highlightPossibleMoves(screen, moves)
         drawHighlightedSquare(screen, possible_piece[1])
+        drawPieces(screen, curr_state)
         drawSelectedPiece(screen, selected_piece)
 
 
@@ -96,10 +108,44 @@ def main():
         p.display.flip()
 
 
+
+def highlightPossibleMoves(screen, moves):
+
+    if moves:
+        for move in moves:
+            s = p.Surface((SQ_SIZE,SQ_SIZE))  # the size of your rect
+            s.set_alpha(128)                # alpha level
+            s.fill(p.Color(BOARD_POSSIBLE_MOVE))           # this fills the entire surface
+            screen.blit(s, (move % DIMENSION * SQ_SIZE,(move // DIMENSION) * SQ_SIZE))
+
+
+
+def get_valid_moves(selected_piece):
+
+    if selected_piece:
+        if piece.rank(selected_piece[0]) == piece.king:
+            moves = game_state.kingmoves(selected_piece[1], piece.color(selected_piece[0]))
+        elif piece.rank(selected_piece[0]) == piece.queen:
+            moves = game_state.queenmoves(selected_piece[1], piece.color(selected_piece[0]))
+        elif piece.rank(selected_piece[0]) == piece.rook:
+            moves = game_state.rookmoves(selected_piece[1], piece.color(selected_piece[0]))
+        elif piece.rank(selected_piece[0]) == piece.bishop:
+            moves = game_state.bishopmoves(selected_piece[1], piece.color(selected_piece[0]))
+        elif piece.rank(selected_piece[0]) == piece.knight:
+            moves = game_state.rookmoves(selected_piece[1], piece.color(selected_piece[0]))
+        elif piece.rank(selected_piece[0]) == piece.pawn:
+            moves = game_state.pawnmoves(selected_piece[1], piece.color(selected_piece[0]))
+    return moves
+
+
 def drawHighlightedSquare(screen, pos):
     
-    rect = p.Rect(pos%DIMENSION * SQ_SIZE, (pos // DIMENSION) * SQ_SIZE, SQ_SIZE, SQ_SIZE)
-    p.draw.rect(screen, p.Color("green"), rect, 5)
+    s = p.Surface((SQ_SIZE,SQ_SIZE))  # the size of your rect
+    s.set_alpha(128)                # alpha level
+    s.fill(p.Color(BOARD_HIGHLIGHT))           # this fills the entire surface
+    screen.blit(s, (pos%DIMENSION * SQ_SIZE,(pos // DIMENSION) * SQ_SIZE))
+    #rect = p.Rect(pos%DIMENSION * SQ_SIZE, (pos // DIMENSION) * SQ_SIZE, SQ_SIZE, SQ_SIZE)
+    #p.draw.rect(screen, p.Color(BOARD_HIGHLIGHT), rect)
 
 
 
@@ -118,7 +164,8 @@ def drawGameState(screen, curr_state):
 
 def drawBoard(screen):
 
-    colors = [p.Color("gray"), p.Color("black")]
+    
+    colors = [p.Color(BOARD_LIGHT), p.Color(BOARD_DARK)]
 
     for r in range(DIMENSION):
         for c in range(DIMENSION):
