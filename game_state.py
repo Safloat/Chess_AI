@@ -45,10 +45,8 @@ class game_state:
     black_kingmoved=0
     black_kingsiderook=0
     black_queensiderook=0
-    #print(curr_board)
-    #1 king, 1 queen, 2 bishops, 2 rooks, 2 knights, 8 pawns 
-    # Black index0=king, index1=queen, index2=bishop1, index3=bishop2, index4=rook1, index5=rook2, index6=knight1, index7=knight2, index8=pawn1, index9=pawn2, index10=pawn3, index11=pawn4, index12=pawn5, index13=pawn6, index14=pawn7, index15=pawn8
-    # White index16=king, index17=queen, index18=bishop1, index19=bishop2, index20=rook1, index21=rook2, index22=knight1, index23=knight2, index24=pawn1, index25=pawn2, index26=pawn3, index27=pawn4, index28=pawn5, index29=pawn6, index30=pawn=7, index31=pawn8
+    
+
 
 
     def init_classic_board():
@@ -116,76 +114,80 @@ class game_state:
         cpos=pos
         #loop for upperleft
         while 1:
-            cpos = cpos - 9     
-            if cpos >= 0:
-                other_piece = game_state.curr_board[cpos] 
-                if other_piece >= 0:
-                    if not piece.is_enemy(other_piece, color):
-                        break
+            if cpos % 8:
+                cpos = cpos - 9     
+                if cpos >= 0:
+                    other_piece = game_state.curr_board[cpos] 
+                    if other_piece >= 0:
+                        if not piece.is_enemy(other_piece, color):
+                            break
+                        else:
+                            val_moves.append(cpos)
+                            break
                     else:
                         val_moves.append(cpos)
+                    if cpos % 8 == 0:
                         break
                 else:
-                    val_moves.append(cpos)
-                if cpos % 8 == 0:
                     break
-            else:
-                break
         cpos=pos
         #loop for upper right
         while 1:
-            cpos=cpos-7
-            if cpos >= 0:
-                other_piece = game_state.curr_board[cpos] 
-                if other_piece >= 0:
-                    if not piece.is_enemy(other_piece, color):
-                        break
+            if (cpos + 1) % 8:
+                cpos=cpos-7
+                if cpos >= 0:
+                    other_piece = game_state.curr_board[cpos] 
+                    if other_piece >= 0:
+                        if not piece.is_enemy(other_piece, color):
+                            break
+                        else:
+                            val_moves.append(cpos)
+                            break
                     else:
                         val_moves.append(cpos)
+                    if (cpos+1) % 8 == 0:
                         break
                 else:
-                    val_moves.append(cpos)
-                if (cpos+1) % 8 == 0:
                     break
-            else:
-                break
-        
+            
         cpos=pos
         #loop for lower right
         while 1:
-            cpos=cpos+9
-            if cpos<64:
-                other_piece = game_state.curr_board[cpos] 
-                if other_piece >= 0:
-                    if not piece.is_enemy(other_piece, color):
-                        break
+            if (cpos + 1) % 8:
+                cpos=cpos+9
+                if cpos<64:
+                    other_piece = game_state.curr_board[cpos] 
+                    if other_piece >= 0:
+                        if not piece.is_enemy(other_piece, color):
+                            break
+                        else:
+                            val_moves.append(cpos)
+                            break
                     else:
                         val_moves.append(cpos)
+                    if (cpos + 1) % 8 == 0:
                         break
                 else:
-                    val_moves.append(cpos)
-                if (cpos + 1) % 8 == 0:
                     break
-            else:
-                break
         cpos=pos
         #loop for lower left
         while 1:
-            cpos=cpos+7
-            if cpos<64:
-                other_piece = game_state.curr_board[cpos] 
-                if other_piece >= 0:
-                    if not piece.is_enemy(other_piece, color):
-                        break
+            if cpos % 8:
+                cpos=cpos+7
+                if cpos<64:
+                    other_piece = game_state.curr_board[cpos] 
+                    if other_piece >= 0:
+                        if not piece.is_enemy(other_piece, color):
+                            break
+                        else:
+                            val_moves.append(cpos)
+                            break
                     else:
                         val_moves.append(cpos)
+                    if cpos % 8 == 0:
                         break
                 else:
-                    val_moves.append(cpos)
-                if cpos % 8 == 0:
                     break
-            else:
-                break
         return val_moves
 
     def kingmoves(pos, color):
@@ -201,7 +203,7 @@ class game_state:
         if pos%8!=0:
             val_moves.append(pos-1)
         #right middle value
-        if (pos-7)%8!=0:
+        if (pos + 1)%8!=0:
             val_moves.append(pos+1)
 
         #bottom row
@@ -209,8 +211,9 @@ class game_state:
             val_moves.append(pos+8)
             if pos%8!=0:
                 val_moves.append(pos+7)
-            if (pos-7)%8!=0:
+            if (pos + 1)%8!=0:
                 val_moves.append(pos+9)
+
         
         game_state.verification_of_moves(color, val_moves)
 
@@ -303,7 +306,7 @@ class game_state:
         val_moves = []
 
         #can move left
-        if pos > ((pos // 8) * 8 + 1):
+        if pos % 8 > 1:
             
             if pos > 7: #can move up
                 val_moves.append(pos - 10)
@@ -311,24 +314,25 @@ class game_state:
                 val_moves.append(pos + 6)
             
         #can move right
-        if pos < ((pos // 8) * 8 + 6):
+        if pos% 8 < 6:
             
             if pos > 7: #can move up
                 val_moves.append(pos - 6)
             if pos < 56:    #can move down
                 val_moves.append(pos + 10)
+        
         #can move up
         if pos > 15:
-            if pos > int(pos / 8) * 8: #can move left
+            if pos % 8: #can move left
                 val_moves.append(pos - 17)
-            if pos < int(pos / 8) * 8 + 7:    #can move right
+            if (pos + 1) % 8:    #can move right
                 val_moves.append(pos - 15)
 
         #can move down
         if pos < 48:
-            if pos > int(pos / 8) * 8: #can move left
+            if pos % 8: #can move left
                 val_moves.append(pos + 15)
-            if pos < int(pos / 8) * 8 + 7:    #can move right
+            if (pos + 1) % 8:    #can move right
                 val_moves.append(pos + 17)
 
         game_state.verification_of_moves(color, val_moves)
