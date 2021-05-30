@@ -90,7 +90,8 @@ def main():
                         game_state.curr_board[selected_piece[1]] = -1
                 elif ((game_state.curr_board[possible_piece[1]] >= 0 and piece.is_enemy(possible_piece[0], selected_piece[0])) \
                 or game_state.curr_board[possible_piece[1]] < 0)\
-                and possible_piece[1] in moves:
+                and possible_piece[1] in moves\
+                or possible_piece[1] == selected_piece[1]:
                     game_state.curr_board[selected_piece[1]] = -1
                     game_state.curr_board[possible_piece[1]] = selected_piece[0]
                     selected_piece = None
