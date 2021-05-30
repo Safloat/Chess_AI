@@ -70,24 +70,24 @@ class game_state:
         
         print(game_state.curr_board)
 
-    def pawnmoves(self,pos,col):
+    def pawnmoves(self, pos, color):
 
         val_mov=[]
         if pos > 7 and pos < 56:
-            if col=='black':
+            if color == piece.black:
                 temp=8
                 for i in range(8):
                     if pos==(temp+i):
                         val_mov.append(pos+16)
                         #en passant check  
-                if pos<56:
+                if pos < 56:
                     val_mov.append(pos+8)
                 if pos%8!=0:
                     val_mov.append(pos+7)
                 if (pos-7)%8==0:
                     val_mov.append(pos+9)
                 
-            if col=='white':
+            if color == piece.white:
                 temp=48
                 for i in range(8):
                     if pos==(temp+i):
@@ -99,19 +99,27 @@ class game_state:
                     val_mov.append(pos-9)
                 if pos%7!=0 :
                     val_mov.append(pos-7)
+        self.verification_of_moves(color, val_mov)
         return val_mov
 
-    def bishopmoves(self,pos):
+    def bishopmoves(self, pos, color):
         val_moves=[]
         cpos=pos
         #loop for upperleft
         while 1:
-            cpos = cpos - 9
+            cpos = cpos - 9     
             if cpos >= 0:
-                val_moves.append(cpos)
+                piece = game_state.curr_board[cpos] 
+                if piece >= 0:
+                    if (piece & color) == color:
+                        break
+                    else:
+                        val_moves.append(cpos)
+                        break
+                else:
+                    val_moves.append(cpos)
                 if cpos % 8 == 0:
                     break
-                
             else:
                 break
         cpos=pos
@@ -119,7 +127,15 @@ class game_state:
         while 1:
             cpos=cpos-7
             if cpos >= 0:
-                val_moves.append(cpos)
+                piece = game_state.curr_board[cpos] 
+                if piece >= 0:
+                    if (piece & color) == color:
+                        break
+                    else:
+                        val_moves.append(cpos)
+                        break
+                else:
+                    val_moves.append(cpos)
                 if (cpos+1) % 8 == 0:
                     break
             else:
@@ -130,7 +146,15 @@ class game_state:
         while 1:
             cpos=cpos+9
             if cpos<64:
-                val_moves.append(cpos)
+                piece = game_state.curr_board[cpos] 
+                if piece >= 0:
+                    if (piece & color) == color:
+                        break
+                    else:
+                        val_moves.append(cpos)
+                        break
+                else:
+                    val_moves.append(cpos)
                 if (cpos + 1) % 8 == 0:
                     break
             else:
@@ -140,14 +164,22 @@ class game_state:
         while 1:
             cpos=cpos+7
             if cpos<64:
-                val_moves.append()
+                piece = game_state.curr_board[cpos] 
+                if piece >= 0:
+                    if (piece & color) == color:
+                        break
+                    else:
+                        val_moves.append(cpos)
+                        break
+                else:
+                    val_moves.append(cpos)
                 if cpos % 8 == 0:
                     break
             else:
                 break
         return val_moves
 
-    def kingmoves(self,pos):
+    def kingmoves(self, pos, color):
         val_moves=[]
         #top row
         if pos>7 and pos<64:
@@ -170,9 +202,12 @@ class game_state:
                 val_moves.append(pos+7)
             if (pos-7)%8!=0:
                 val_moves.append(pos+9)
+        
+        self.verification_of_moves(color, val_moves)
+
         return val_moves
 
-    def rookmoves(self,pos):
+    def rookmoves(self, pos, color):
         val_moves=[]
         cpos=pos
         #upwards
@@ -180,7 +215,15 @@ class game_state:
             while 1:
                 cpos=cpos-8
                 if cpos>=0:
-                    val_moves.append(cpos)
+                    piece = game_state.curr_board[cpos] 
+                    if piece >= 0:
+                        if (piece & color) == color:
+                            break
+                        else:
+                            val_moves.append(cpos)
+                            break
+                    else:
+                        val_moves.append(cpos)
                 else:
                     break
         #downwards
@@ -189,7 +232,15 @@ class game_state:
             while 1:
                 cpos=cpos+8
                 if cpos<=63:
-                    val_moves.append(cpos)
+                    piece = game_state.curr_board[cpos] 
+                    if piece >= 0:
+                        if (piece & color) == color:
+                            break
+                        else:
+                            val_moves.append(cpos)
+                            break
+                    else:
+                        val_moves.append(cpos)
                 else:
                     break
         #left
@@ -197,30 +248,48 @@ class game_state:
         if cpos%8!=0 and cpos>=0 and cpos<64:
             while 1:
                 cpos=cpos-1
-                if cpos%8==0:
-                    break
+                piece = game_state.curr_board[cpos] 
+                if piece >= 0:
+                    if (piece & color) == color:
+                        break
+                    else:
+                        val_moves.append(cpos)
+                        break
                 else:
                     val_moves.append(cpos)
+                
+                if cpos % 8 == 0:
+                    break
+                
         
         #right
         cpos=pos
         if (cpos-7)%8!=0 and cpos>=0 and cpos<64:
             while 1:
                 cpos=cpos+1
-                if (cpos-7)%8==0:
-                    break
+                piece = game_state.curr_board[cpos] 
+                if piece >= 0:
+                    if (piece & color) == color:
+                        break
+                    else:
+                        val_moves.append(cpos)
+                        break
                 else:
                     val_moves.append(cpos)
+                
+                if (cpos-7)%8==0:
+                    break
+               
         return val_moves
 
-    def queenmoves(self,pos):
+    def queenmoves(self, pos, color):
         val_moves=[]
         if pos>=0 and pos<64:
             val_moves += self.rookmoves(pos)
             val_moves += self.bishopmoves(pos)
         return val_moves
 
-    def knightmoves(self, pos):
+    def knightmoves(self, pos, color):
         
         val_moves = []
 
@@ -252,18 +321,20 @@ class game_state:
                 val_moves.append(pos + 15)
             if pos < int(pos / 8) * 8 + 7:    #can move right
                 val_moves.append(pos + 17)
+
+        self.verification_of_moves(color, val_moves)
         return val_moves
 
-    def check_castling(self,pos,col):
+    def check_castling(self, pos, color):
         res=[]
-        if col=="white":
+        if color == piece.white:
             #for kingside
              if self.white_kingmoved==0 and self.white_kingsiderook==0 and self.curr_board[62]<0 and self.curr_board[61]<0:
                  res.append("kingside")
              if self.white_kingmoved==0 and self.white_queensiderook==0 and self.curr_board[59]<0 and self.curr_board[58]<0 and self.curr_board[57]<0:
                  res.append("queenside")
         
-        if col=="black":
+        if color == piece.black:
             #for kingside
              if self.black_kingmoved==0 and self.black_kingsiderook==0 and self.curr_board[5]<0 and self.curr_board[6]<0:
                  res.append("kingside")
@@ -271,19 +342,8 @@ class game_state:
                  res.append("queenside")
 
         return res
-
-
+    def verification_of_move(self, color, moves):
         
-
-
-
-
-
-
-
-        
-
-
-                
-    
-
+        for i, move in enumerate(moves):
+            if game_state.curr_board[move] >= 0 and (game_state.curr_board[move] & color) == color:
+                moves.pop(i)
