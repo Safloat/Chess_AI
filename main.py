@@ -90,12 +90,34 @@ def main():
                         game_state.curr_board[selected_piece[1]] = -1
                 elif ((game_state.curr_board[possible_piece[1]] >= 0 and piece.is_enemy(possible_piece[0], selected_piece[0])) \
                 or game_state.curr_board[possible_piece[1]] < 0)\
-                and possible_piece[1] in moves\
-                or possible_piece[1] == selected_piece[1]:
+                and possible_piece[1] in moves:
+                    game_state.curr_board[selected_piece[1]] = -1
+                    game_state.curr_board[possible_piece[1]] = selected_piece[0]
+                    
+                    game_state.en_passant = None
+
+                    if piece.rank(selected_piece[0]) == piece.pawn:
+                        if piece.color(selected_piece[0]) == piece.white:
+                            if possible_piece[1] // DIMENSION == 5:     
+                                game_state.en_passant.append(possible_piece[1])
+                        
+                        elif piece.color(selected_piece[0]) == piece.black:
+                            if possible_piece[1] // DIMENSION == 2: 
+                                game_state.en_passant.append(possible_piece[1])
+                    
+                                
+                    
+
+                    
+                    selected_piece = None
+                    moves = None
+
+                elif possible_piece[1] == selected_piece[1]:
                     game_state.curr_board[selected_piece[1]] = -1
                     game_state.curr_board[possible_piece[1]] = selected_piece[0]
                     selected_piece = None
                     moves = None
+
 
         
         drawBoard(screen)
