@@ -45,9 +45,10 @@ class game_state:
     black_kingmoved=0
     black_kingsiderook=0
     black_queensiderook=0
+    white_checkmate=0
+    black_checkmate=0
     
-
-
+    en_passant = None
 
     def init_classic_board():
 
@@ -91,6 +92,16 @@ class game_state:
                 if game_state.curr_board[pos + 9] >= 0 and piece.is_enemy(game_state.curr_board[pos + 9], color):
                     if (pos + 1)%8 == 0:
                         val_mov.append(pos+9)
+                
+                if pos // 8 == 5:
+                    if pos % 8:
+                        if game_state.en_passant and pos - 1 == game_state.en_passant:
+                            val_mov.append(pos - 1)
+                    elif (pos + 1) % 8: 
+                        if game_state.en_passant and pos + 1 == game_state.en_passant:
+                            val_mov.append(pos + 1)
+                
+                #
                     
             if color == piece.white:
                 if game_state.curr_board[pos - 16] < 0:
@@ -106,6 +117,17 @@ class game_state:
                 if game_state.curr_board[pos - 7] >= 0 and piece.is_enemy(game_state.curr_board[pos - 7], color):
                     if (pos + 1)%8 != 0 :
                         val_mov.append(pos-7)
+
+
+                if pos // 8 == 2:
+                    if pos % 8:
+                        if game_state.en_passant and pos - 1 == game_state.en_passant:
+                            val_mov.append(pos - 1)
+                    elif (pos + 1) % 8: 
+                        if game_state.en_passant and pos + 1 == game_state.en_passant:
+                            val_mov.append(pos + 1)
+
+
         game_state.verification_of_moves(color, val_mov)
         return val_mov
 
