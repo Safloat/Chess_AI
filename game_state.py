@@ -214,10 +214,7 @@ class game_state:
             if (pos + 1)%8!=0:
                 val_moves.append(pos+9)
 
-        
-        game_state.verification_of_moves(color, val_moves)
-
-        return val_moves
+        return game_state.verification_of_moves(color, val_moves)
 
     def rookmoves(pos, color):
         val_moves=[]
@@ -335,8 +332,7 @@ class game_state:
             if (pos + 1) % 8:    #can move right
                 val_moves.append(pos + 17)
 
-        game_state.verification_of_moves(color, val_moves)
-        return val_moves
+        return game_state.verification_of_moves(color, val_moves)
 
     def check_castling(pos, color):
         res=[]
@@ -357,6 +353,11 @@ class game_state:
         return res
     def verification_of_moves(color, moves):
         
-        for i, move in enumerate(moves):
-            if game_state.curr_board[move] >= 0 and not piece.is_enemy(game_state.curr_board[move],color):
-                moves.pop(i)
+        valid_moves = []
+        
+        for move in moves:
+            if not (game_state.curr_board[move] >= 0 and not piece.is_enemy(game_state.curr_board[move],color)):
+                valid_moves.append(move)
+        
+        return valid_moves
+                
