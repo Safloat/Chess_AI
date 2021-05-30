@@ -98,17 +98,18 @@ def main():
 
                     if piece.rank(selected_piece[0]) == piece.pawn:
                         if piece.color(selected_piece[0]) == piece.white:
-                            if possible_piece[1] // DIMENSION == 5:     
-                                game_state.en_passant.append(possible_piece[1])
+                            if possible_piece[1] // DIMENSION == 4:     
+                                game_state.en_passant = possible_piece[1]
                         
                         elif piece.color(selected_piece[0]) == piece.black:
-                            if possible_piece[1] // DIMENSION == 2: 
-                                game_state.en_passant.append(possible_piece[1])
+                            if possible_piece[1] // DIMENSION == 3: 
+                                game_state.en_passant = possible_piece[1]
+                        print(game_state.en_passant)
                     
                                 
                     
 
-                    
+
                     selected_piece = None
                     moves = None
 

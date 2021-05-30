@@ -79,8 +79,9 @@ class game_state:
         val_mov=[]
         if pos > 7 and pos < 56:
             if color == piece.black:
-                if game_state.curr_board[pos + 16] < 0:
-                    if pos // 8 == 1:
+
+                if pos // 8 == 1:
+                    if game_state.curr_board[pos + 16] < 0:
                         val_mov.append(pos+16)
                         #en passant check  
                 if game_state.curr_board[pos + 8] < 0:
@@ -93,20 +94,18 @@ class game_state:
                     if (pos + 1)%8 == 0:
                         val_mov.append(pos+9)
                 
-                if pos // 8 == 5:
+                if pos // 8 == 4:
                     if pos % 8:
                         if game_state.en_passant and pos - 1 == game_state.en_passant:
                             val_mov.append(pos - 1)
-                    elif (pos + 1) % 8: 
+                    if (pos + 1) % 8: 
                         if game_state.en_passant and pos + 1 == game_state.en_passant:
                             val_mov.append(pos + 1)
-                
-                #
                     
             if color == piece.white:
-                if game_state.curr_board[pos - 16] < 0:
-                    if pos // 8 == 6:
-                        val_mov.append(pos-16)
+                if pos // 8 == 6:
+                    if game_state.curr_board[pos - 16] < 0:    
+                            val_mov.append(pos-16)
                             #en passant check
                 if game_state.curr_board[pos - 8] < 0:
                     if pos>7:
@@ -119,11 +118,11 @@ class game_state:
                         val_mov.append(pos-7)
 
 
-                if pos // 8 == 2:
+                if pos // 8 == 3:
                     if pos % 8:
                         if game_state.en_passant and pos - 1 == game_state.en_passant:
                             val_mov.append(pos - 1)
-                    elif (pos + 1) % 8: 
+                    if (pos + 1) % 8: 
                         if game_state.en_passant and pos + 1 == game_state.en_passant:
                             val_mov.append(pos + 1)
 
