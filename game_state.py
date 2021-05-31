@@ -489,9 +489,13 @@ class game_state:
 
     #check if king can move out of the way, just get lists of valid king movescompare them with enemy colour's valid moves, pop out the moves that put king under attack
       
+       
         if kings_moves:
             if piece.color(_piece[0]) == piece.white:
                 game_state.white_checkmate = 0
+            if piece.color(_piece[0]):
+                game_state.black_checkmate = 0
+
        #if list is not empty
             #self.colour_checkmate=0
             #return
