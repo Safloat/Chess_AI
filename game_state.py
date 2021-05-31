@@ -454,13 +454,13 @@ class game_state:
             for move in moves:
                 if game_state.curr_board[move] == piece.white | piece.king:
                     game_state.white_checkmate = 1
-                    return game_state.endgame_check(move, color, moves)
+                    return game_state.endgame_check((piece.white | piece.king, move), moves)
 
         else:
             for move in moves:
                 if game_state.curr_board[move] == piece.black | piece.king:
                     game_state.black_checkmate = 1
-                    return game_state.endgame_check(move, color, moves)
+                    return game_state.endgame_check((piece.white | piece.king, move), moves)
         
 
 
@@ -482,13 +482,16 @@ class game_state:
         return game_state.evaluate_checkmate(piece.opposite_color(color), moves)     
         
 
-    def endgame_check(pos,color,moves): #where pos is attacker position colr is colour of king
+    def endgame_check(_piece,moves): #where pos is attacker position colr is colour of king
     
         
-    
+        kings_moves = game_state.get_valid_moves(_piece) - moves
 
     #check if king can move out of the way, just get lists of valid king movescompare them with enemy colour's valid moves, pop out the moves that put king under attack
       
+        if kings_moves:
+            if piece.color(_piece[0]) == piece.white:
+                game_state.white_checkmate = 0
        #if list is not empty
             #self.colour_checkmate=0
             #return

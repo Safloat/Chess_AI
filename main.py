@@ -146,9 +146,9 @@ def main():
                         
 
                         
-                        game_state.is_checkmating(piece.opposite_color(selected_piece[0]))
                         
-                        game_state.is_checkmated(piece.color(selected_piece[0])):
+                        
+                        if game_state.is_checkmated(piece.color(selected_piece[0])) or game_state.is_checkmating(piece.opposite_color(selected_piece[0])):
                             print("checkmate")
 
 
