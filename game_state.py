@@ -392,7 +392,8 @@ class game_state:
                     game_state.black_queenside_castling = 1
 
         
-        game_state.add_castling_moves(color, val_moves) 
+        game_state.add_castling_moves(color, val_moves)
+        game_state.get_all_valid_moves() 
         return game_state.verification_of_moves(color, val_moves)
 
 
@@ -485,10 +486,12 @@ class game_state:
     def endgame_check(_piece,moves): #where pos is attacker position colr is colour of king
     
         
-        kings_moves = game_state.get_valid_moves(_piece) - moves
-
+        
+        king_moves = game_state.get_valid_moves(_piece)
+        escape_moves = [move for move in king_moves if move not in moves]
     #check if king can move out of the way, just get lists of valid king movescompare them with enemy colour's valid moves, pop out the moves that put king under attack
       
+<<<<<<< HEAD
        
         if kings_moves:
             if piece.color(_piece[0]) == piece.white:
@@ -496,11 +499,22 @@ class game_state:
             if piece.color(_piece[0]):
                 game_state.black_checkmate = 0
 
+=======
+        if king_moves:
+            if piece.color(_piece[0]) == piece.white:
+                game_state.white_checkmate = 0
+            else:
+                game_state.black_checkmate = 0
+            return
+>>>>>>> 34be2f3109d52ab2967181527eaa042f6975c8a5
        #if list is not empty
             #self.colour_checkmate=0
             #return
+
+        else:
+            
         #else
-            #check if king can attack the pawn that can kill it
+            #check if king can attack the piece that can kill it
                 #if yes then checkmate=0
                 #return
             #if no
@@ -509,7 +523,6 @@ class game_state:
                         #checkmate=0
                     #if no
                         #return checkmate=1
-        pass
 
     def get_all_valid_moves(turn):
 
