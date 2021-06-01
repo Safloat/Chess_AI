@@ -1,76 +1,59 @@
-##########################
-###### MINI-MAX A-B ######
-##########################
+# Python3 program to demonstrate
+# working of Alpha-Beta Pruning
 
-class AlphaBeta:
-    # print utility value of root node (assuming it is max)
-    # print names of all nodes visited during search
-    def __init__(self, game_tree):
-        self.game_tree = game_tree  # GameTree
-        self.root = game_tree.root  # GameNode
-        return
+# Initial values of Aplha and Beta
+MAX, MIN = 1000, -1000
 
-    def alpha_beta_search(self, node):
-    
-        best_val = float('-inf')
-        beta = float('inf')
+# Returns optimal value for current player
+#(Initially called for root and maximizer)
+def minimax(depth, nodeIndex, maximizingPlayer,
+			values, alpha, beta):
 
-        successors = self.getSuccessors(node)
-        best_state = None
-        for state in successors:
-            value = self.min_value(state, best_val, beta)
-            if value > best_val:
-                best_val = value
-                best_state = state
-        print ("AlphaBeta:  Utility Value of Root Node: = " + str(best_val))
-        print ("AlphaBeta:  Best State is: " + best_state.Name)
-        return best_state
+	# Terminating condition. i.e
+	# leaf node is reached
+	if depth == 3:
+		return values[nodeIndex]
 
-    def max_value(self, node, alpha, beta):
-        print ("AlphaBeta–>MAX: Visited Node :: " + node.Name)
-        if self.isTerminal(node):
-            return self.getUtility(node)
-        infinity = float('inf')
-        value = float('-inf')
+	if maximizingPlayer:
+	
+		best = MIN
 
-        successors = self.getSuccessors(node)
-        for state in successors:
-            value = max(value, self.min_value(state, alpha, beta))
-            if value >= beta:
-                return value
-            alpha = max(alpha, value)
-        return value
+		# Recur for left and right children
+		for i in range(0, 2):
+			
+			val = minimax(depth + 1, nodeIndex * 2 + i,
+						False, values, alpha, beta)
+			best = max(best, val)
+			alpha = max(alpha, best)
 
-    def min_value(self, node, alpha, beta):
-        print ("AlphaBeta–>MIN: Visited Node :: " + node.Name)
-        if self.isTerminal(node):
-            return self.getUtility(node)
-        infinity = float('inf')
-        value = infinity
+			# Alpha Beta Pruning
+			if beta <= alpha:
+				break
+		
+		return best
+	
+	else:
+		best = MAX
 
-        successors = self.getSuccessors(node)
-        for state in successors:
-            value = min(value, self.max_value(state, alpha, beta))
-            if value <= alpha:
-                return value
-            beta = min(beta, value)
+		# Recur for left and
+		# right children
+		for i in range(0, 2):
+		
+			val = minimax(depth + 1, nodeIndex * 2 + i,
+							True, values, alpha, beta)
+			best = min(best, val)
+			beta = min(beta, best)
 
-        return value
-    #                     #
-    #   UTILITY METHODS   #
-    #                     #
+			# Alpha Beta Pruning
+			if beta <= alpha:
+				break
+		
+		return best
+	
+# Driver Code
+if __name__ == "__main__":
 
-    # successor states in a game tree are the child nodes…
-    def getSuccessors(self, node):
-        assert node is not None
-        return node.children
-
-    # return true if the node has NO children (successor states)
-    # return false if the node has children (successor states)
-    def isTerminal(self, node):
-        assert node is not None
-        return len(node.children) == 0
-
-    def getUtility(self, node):
-        assert node is not None
-        return node.value
+	values = [3, 5, 6, 9, 1, 2, 0, -1]
+	print("The optimal value is :", minimax(0, 0, True, values, MIN, MAX))
+	
+# This code is contributed by Rituraj Jain
