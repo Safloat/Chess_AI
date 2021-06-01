@@ -507,16 +507,18 @@ class game_state:
     def evaluate_checkmate(color):
         
         if color == piece.white:
-            for move in game_state.black_moves:
-                if game_state.curr_board[move] == piece.white | piece.king:
-                    game_state.white_checkmate = 1
-                    return game_state.endgame_check((piece.white | piece.king, move),game_state.white_moves, game_state.black_moves)
+            for moves in game_state.black_moves:
+                for move in moves[1]:
+                    if game_state.curr_board[move] == piece.white | piece.king:
+                        game_state.white_checkmate = 1
+                        return game_state.endgame_check((piece.white | piece.king, move),game_state.white_moves, game_state.black_moves)
 
         else:
-            for move in game_state.white_moves:
-                if game_state.curr_board[move] == piece.black | piece.king:
-                    game_state.black_checkmate = 1
-                    return game_state.endgame_check((piece.black | piece.king, move), game_state.black_moves, game_state.white_moves)
+            for moves in game_state.white_moves:
+                for move in moves[1]:
+                    if game_state.curr_board[move] == piece.black | piece.king:
+                        game_state.black_checkmate = 1
+                        return game_state.endgame_check((piece.black | piece.king, move), game_state.black_moves, game_state.white_moves)
         
 
 
