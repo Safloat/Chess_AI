@@ -645,6 +645,8 @@ class game_state:
 
         game_state.evaluate_checkmate(piece.white)
         game_state.evaluate_checkmate(piece.black)
+
+        
 '''     
     def check_castling(pos, color):
         res=[]

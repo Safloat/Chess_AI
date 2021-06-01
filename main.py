@@ -69,7 +69,7 @@ def main():
     game_state.init_classic_board()
 
     curr_state = game_state.curr_board
-    
+
     loadImages()
     running = True
 
@@ -151,9 +151,10 @@ def main():
                         game_state.set_possible_moves()
                         game_state.checkmate()
 
-                        if game_state.is_checkmated(piece.color(selected_piece[0])) or game_state.is_checkmating(piece.opposite_color(selected_piece[0])):
-                            print("checkmate")
-
+                        if game_state.white_checkmate:
+                            print("white_checkmate")
+                        if game_state.black_checkmate:
+                            print("black_checkmate")
 
 
 
