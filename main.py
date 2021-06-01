@@ -196,7 +196,7 @@ def main():
 def highlightPossibleMoves(screen, moves):
 
     if moves:
-        for move in moves:
+        for move in moves[1]:
             s = p.Surface((SQ_SIZE,SQ_SIZE))  # the size of your rect
             s.set_alpha(128)                # alpha level
             s.fill(p.Color(BOARD_POSSIBLE_MOVE))           # this fills the entire surface
