@@ -15,7 +15,7 @@ BOARD_DARK = "blanchedalmond"
 BOARD_HIGHLIGHT = "white"
 BOARD_POSSIBLE_MOVE = "brown"
 
-
+gameover=0
 MAX_FPS = 60
 
 IMAGES = {}
@@ -182,8 +182,10 @@ def main():
                         curr_state.checkmate()
 
                         if curr_state.white_checkmate:
+                            running=False
                             print("white_checkmate")
                         if curr_state.black_checkmate:
+                            running=False
                             print("black_checkmate")
 
                         
