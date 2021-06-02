@@ -115,13 +115,26 @@ def main():
                                 if possible_piece[1] // DIMENSION == 4:     
                                     curr_state.en_passant = possible_piece[1]
                                 if possible_piece[1] // DIMENSION == 0:
+
+                                    curr_state.piece_indices[selected_piece[0]].remove(possible_piece[1])
+                                    
                                     selected_piece = (piece.white | piece.queen, selected_piece[1])
+
+                                    curr_state.piece_indices[selected_piece[0]].append(possible_piece[1])
+
+                                    curr_state.board[possible_piece[1]] = selected_piece[0]
                             
                             elif piece.color(selected_piece[0]) == piece.black:
                                 if possible_piece[1] // DIMENSION == 3: 
                                     curr_state.en_passant = possible_piece[1]
                                 if possible_piece[1] // DIMENSION == 7:
+                                    curr_state.piece_indices[selected_piece[0]].remove(possible_piece[1])
+                                    
                                     selected_piece = (piece.black | piece.queen, selected_piece[1])
+
+                                    curr_state.piece_indices[selected_piece[0]].append(possible_piece[1])
+
+                                    curr_state.board[possible_piece[1]] = selected_piece[0]
                         
                         curr_state.en_passant = None
 
