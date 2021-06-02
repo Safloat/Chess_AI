@@ -32,7 +32,7 @@ def minimaxRoot(depth, curr_state, isMaximizing, turn):
     
     return bestMoveFinal
 
-def minimax(depth, board, alpha, beta, is_maximizing, turn):
+def minimax(depth, curr_state, alpha, beta, is_maximizing, turn):
     if(depth == 0):
         return -evaluation(curr_state)
     
@@ -44,89 +44,55 @@ def minimax(depth, board, alpha, beta, is_maximizing, turn):
     if(is_maximizing):
         bestMove = -9999
         for moves in possibleMoves:
-			for move in moves[1]:
-				move = chess.Move.from_uci(str(x))
-				board.push(move)
-				bestMove = max(bestMove,minimax(depth - 1, board,alpha,beta, not is_maximizing))
-				board.pop()
-				alpha = max(alpha,bestMove)
-				if beta <= alpha:
-					return bestMove
+            for move in moves[1]:
+                possible_state = deepcopy(curr_state)   #create a deep copy of the current state
+                possible_state.move_piece((curr_state.board[moves[0]], moves[0]), (curr_state.board[move], move))
+                bestMove = max(bestMove,minimax(depth - 1,possible_state,alpha,beta, not is_maximizing, piece.opposite_color(turn)))
+                alpha = max(alpha,bestMove)
+                if beta <= alpha:
+                    return bestMove
         return bestMove
     else:
         bestMove = 9999
-        for x in possibleMoves:
-            move = chess.Move.from_uci(str(x))
-            board.push(move)
-            bestMove = min(bestMove, minimax(depth - 1, board,alpha,beta, not is_maximizing))
-            board.pop()
-            beta = min(beta,bestMove)
-            if(beta <= alpha):
-                return bestMove
+        for moves in possibleMoves:
+            for move in moves[1]:
+                possible_state = deepcopy(curr_state)   #create a deep copy of the current state
+                possible_state.move_piece((curr_state.board[moves[0]], moves[0]), (curr_state.board[move], move))
+                
+                bestMove = min(bestMove, minimax(depth - 1, possible_state,alpha,beta, not is_maximizing, piece.opposite_color(turn)))
+        
+                beta = min(beta,bestMove)
+                if(beta <= alpha):
+                    return bestMove
         return bestMove
 
 
-# def calculateMove(board):
-#     possible_moves = board.legal_moves
-#     if(len(possible_moves) == 0):
-#         print("No more possible moves...Game Over")
-#         sys.exit()
-#     bestMove = None
-#     bestValue = -9999
-#     n = 0
-#     for x in possible_moves:
-#         move = chess.Move.from_uci(str(x))
-#         board.push(move)
-#         boardValue = -evaluation(board)
-#         board.pop()
-#         if(boardValue > bestValue):
-#             bestValue = boardValue
-#             bestMove = move
-
-#     return bestMove
-
 def evaluation(curr_state, turn):
     for _piece in curr_state.board:
-        evaluation = evaluation + (getPieceValue(_piece) if piece.is_enemy(turn,) else -getPieceValue(str(board.piece_at(i))))
+        evaluation = evaluation + getPieceValue(_piece) if not piece.is_enemy(_piece, turn) else -getPieceValue(_piece)
     return evaluation
 
 
 def getPieceValue(piece):
-    if(piece == None):
+    if(piece == -1):
         return 0
     value = 0
-    if piece == "P" or piece == "p":
+    rank = piece.rank(piece)
+    if rank == piece.pawn:
         value = 10
-    if piece == "N" or piece == "n":
+    if rank == piece.knight:
         value = 30
-    if piece == "B" or piece == "b":
+    if rank == piece.bishop:
         value = 30
-    if piece == "R" or piece == "r":
+    if rank == piece.rook:
         value = 50
-    if piece == "Q" or piece == "q":
+    if rank == piece.queen:
         value = 90
-    if piece == 'K' or piece == 'k':
+    if rank == piece.king:
         value = 900
     #value = value if (board.piece_at(place)).color else -value
     return value
 
-def main():
-    board = chess.Board()
-    n = 0
-    print(board)
-    while n < 100:
-        if n%2 == 0:
-            move = input("Enter move: ")
-            move = chess.Move.from_uci(str(move))
-            board.push(move)
-        else:
-            print("Computers Turn:")
-            move = minimaxRoot(3,board,True)
-            move = chess.Move.from_uci(str(move))
-            board.push(move)
-        print(board)
-        n += 1
 
 
-
-
+_
