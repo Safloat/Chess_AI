@@ -1,9 +1,8 @@
 import pygame as p
 from game_state import piece
 from game_state import game_state
+from itertools import chain
 import numpy as np
-import pieces
-import board
 from collections import defaultdict
 
 
@@ -66,9 +65,9 @@ def main():
 
     screen.fill(p.Color("white"))
 
-    game_state.init_classic_board()
+    curr_state = game_state()
+    curr_state.init_classic_board()
 
-    curr_state = game_state.curr_board
 
     loadImages()
     running = True
@@ -77,103 +76,123 @@ def main():
 
     moves = None
 
-    turn = None
 
     while running:
         
-        possible_piece = get_square_under_mouse(game_state.curr_board)
+        possible_piece = get_square_under_mouse(curr_state.board)
 
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
             if e.type == p.MOUSEBUTTONDOWN:
-                if not turn or (selected_piece and turn == (piece.color(selected_piece[0]))) or (possible_piece[0] >=0 and turn == piece.color(possible_piece[0])):
+                if not curr_state.turn or (selected_piece and curr_state.turn == (piece.color(selected_piece[0]))) or (possible_piece[0] >=0 and curr_state.turn == piece.color(possible_piece[0])):
                     if not selected_piece:
                         
                         if possible_piece[0] >= 0:
                             selected_piece = possible_piece
-                            moves = game_state.get_valid_moves(selected_piece)
+                            moves = curr_state.get_valid_moves(selected_piece)
                             
-                            game_state.curr_board[selected_piece[1]] = -1
+                            curr_state.board[selected_piece[1]] = -1
 
-                            if not turn:
-                                turn = piece.color(selected_piece[0])
+                            if not curr_state.turn:
+                                curr_state.turn = piece.color(selected_piece[0])
 
 
                     elif ((possible_piece[0] >= 0 and piece.is_enemy(possible_piece[0], selected_piece[0])) \
-                    or game_state.curr_board[possible_piece[1]] < 0)\
-                    and possible_piece[1] in moves:
-                        game_state.curr_board[selected_piece[1]] = -1
-                        game_state.curr_board[possible_piece[1]] = selected_piece[0]
-
-                        game_state.current_piece_indices[selected_piece[0]].remove(selected_piece[1])
-                        game_state.current_piece_indices[selected_piece[0]].append(possible_piece[1])
-
-                        if possible_piece[0] >= 0:
-                            game_state.current_piece_indices[possible_piece[0]].remove(possible_piece[1])
-
+                    or curr_state.board[possible_piece[1]] < 0)\
+                    and possible_piece[1] in moves[1]\
+                    or ((piece.rank(selected_piece[0]) in [piece.rook, piece.bishop, piece.queen] and possible_piece[1] in list(chain.from_iterable(moves[1])))):
                         
-                        game_state.en_passant = None
+
 
                         if piece.rank(selected_piece[0]) == piece.pawn:
+
                             if piece.color(selected_piece[0]) == piece.white:
                                 if possible_piece[1] // DIMENSION == 4:     
-                                    game_state.en_passant = possible_piece[1]
+                                    curr_state.en_passant = possible_piece[1]
+                                if possible_piece[1] // DIMENSION == 0:
+                                    selected_piece[0] = piece.white | piece.queen
                             
                             elif piece.color(selected_piece[0]) == piece.black:
                                 if possible_piece[1] // DIMENSION == 3: 
-                                    game_state.en_passant = possible_piece[1]
+                                    curr_state.en_passant = possible_piece[1]
+                                if possible_piece[1] // DIMENSION == 7:
+                                    selected_piece[0] = piece.black | piece.queen
+
+                        curr_state.move_piece(selected_piece, possible_piece)
+                        
+                        curr_state.en_passant = None
+
+                        
                         
                         if piece.rank(selected_piece[0]) == piece.king:
+                            
                             if piece.color(selected_piece[0]) == piece.white:
-                                game_state.white_kingmoved = 1
+                                if curr_state.white_kingside_castling and possible_piece[1] == 62:
+                                    
+                                    curr_state.move_piece((piece.white | piece.rook, 63), (-1, 61))
+
+                                    curr_state.white_kingside_castling = 0
+
+                                elif curr_state.white_queenside_castling and possible_piece[1] == 58:
+
+                                    curr_state.move_piece((piece.white | piece.rook, 56), (-1, 59))
+
+                                    curr_state.white_queenside_castling = 0
+                                    
+                                curr_state.white_kingmoved = 1
                             elif piece.color(selected_piece[0]) == piece.black:
-                                game_state.black_kingmoved = 1
+                                if curr_state.black_kingside_castling and possible_piece[1] == 6:
+
+                                    curr_state.move_piece((piece.black | piece.rook, 7), (-1, 5))
+
+                                    curr_state.black_kingside_castling = 0
+
+                                elif curr_state.black_queenside_castling and possible_piece[1] == 2:
+
+                                    curr_state.move_piece((piece.black | piece.rook, 0), (-1, 3))
+
+                                    curr_state.black_queenside_castling = 0
+
+
+                                curr_state.black_kingmoved = 1
 
                         if piece.rank(selected_piece[0]) == piece.rook:
                             if piece.color(selected_piece[0]) == piece.white:
                                 if selected_piece[1] % 8:
-                                    game_state.white_queensiderook = 1
+                                    curr_state.white_queensiderook = 1
                                 elif (selected_piece[1] + 1) % 8:
-                                    game_state.white_kingsiderook = 1
+                                    curr_state.white_kingsiderook = 1
                             
                             if piece.color(selected_piece[0]) == piece.black:
                                 if selected_piece[1] % 8:
-                                    game_state.black_queensiderook = 1
+                                    curr_state.black_queensiderook = 1
                                 elif (selected_piece[1] + 1) % 8:
-                                    game_state.black_kingsiderook = 1
+                                    curr_state.black_kingsiderook = 1
                         
-                            print(game_state.en_passant)
+                            print(curr_state.en_passant)
                         
 
                         
                         
-                        game_state.set_possible_moves()
-                        game_state.checkmate()
+                        curr_state.set_possible_moves()
+                        curr_state.checkmate()
 
-                        if game_state.white_checkmate:
+                        if curr_state.white_checkmate:
                             print("white_checkmate")
-                        if game_state.black_checkmate:
+                        if curr_state.black_checkmate:
                             print("black_checkmate")
 
-
-
-
-
-                        if turn == piece.white:
-                            turn = piece.black
-                        else:
-                            turn = piece.white
+                        
+                        curr_state.switch_turn()
 
                         
-
-
                         selected_piece = None
                         moves = None
 
                     elif possible_piece[1] == selected_piece[1]:
-                        game_state.curr_board[selected_piece[1]] = -1
-                        game_state.curr_board[possible_piece[1]] = selected_piece[0]
+                        curr_state.board[selected_piece[1]] = -1
+                        curr_state.board[possible_piece[1]] = selected_piece[0]
                         selected_piece = None
                         moves = None
 
@@ -181,7 +200,7 @@ def main():
         drawBoard(screen)
         highlightPossibleMoves(screen, moves)
         drawHighlightedSquare(screen, possible_piece[1])
-        drawPieces(screen, curr_state)
+        drawPieces(screen, curr_state.board)
         drawSelectedPiece(screen, selected_piece)
 
 
@@ -193,14 +212,21 @@ def main():
 
 
 
+
 def highlightPossibleMoves(screen, moves):
 
     if moves:
-        for move in moves:
+        for move in moves[1]:
             s = p.Surface((SQ_SIZE,SQ_SIZE))  # the size of your rect
             s.set_alpha(128)                # alpha level
             s.fill(p.Color(BOARD_POSSIBLE_MOVE))           # this fills the entire surface
-            screen.blit(s, (move % DIMENSION * SQ_SIZE,(move // DIMENSION) * SQ_SIZE))
+
+            if type(move) is int:
+                screen.blit(s, (move % DIMENSION * SQ_SIZE,(move // DIMENSION) * SQ_SIZE))
+            else:
+                for sliding_move in move:
+                    screen.blit(s, (sliding_move % DIMENSION * SQ_SIZE,(sliding_move // DIMENSION) * SQ_SIZE))
+
 
 
 
