@@ -7,6 +7,8 @@ import numpy as np
 from collections import defaultdict
 
 
+running = True
+
 WIDTH = HEIGHT = 512
 DIMENSION = 8
 SQ_SIZE = HEIGHT // DIMENSION
@@ -71,7 +73,6 @@ def main():
 
 
     loadImages()
-    running = True
 
     selected_piece = None
 
@@ -114,103 +115,10 @@ def main():
 
                         curr_state.move_piece(selected_piece, new_position)
 
-                        if piece.rank(selected_piece[0]) == piece.pawn:
+                        selected_piece = setup_variables(selected_piece, new_position, curr_state)
 
-                            if piece.color(selected_piece[0]) == piece.white:
-                                if new_position[1] // DIMENSION == 4:     
-                                    curr_state.en_passant = new_position[1]
-                                if new_position[1] // DIMENSION == 0:
-
-                                    curr_state.piece_indices[selected_piece[0]].remove(new_position[1])
-                                    
-                                    selected_piece = (piece.white | piece.queen, selected_piece[1])
-
-                                    curr_state.piece_indices[selected_piece[0]].append(new_position[1])
-
-                                    curr_state.board[new_position[1]] = selected_piece[0]
-                            
-                            elif piece.color(selected_piece[0]) == piece.black:
-                                if new_position[1] // DIMENSION == 3: 
-                                    curr_state.en_passant = new_position[1]
-                                if new_position[1] // DIMENSION == 7:
-                                    curr_state.piece_indices[selected_piece[0]].remove(new_position[1])
-                                    
-                                    selected_piece = (piece.black | piece.queen, selected_piece[1])
-
-                                    curr_state.piece_indices[selected_piece[0]].append(new_position[1])
-
-                                    curr_state.board[new_position[1]] = selected_piece[0]
-                        
-                        curr_state.en_passant = None
-
-                        
-                        
-                        if piece.rank(selected_piece[0]) == piece.king:
-                            
-                            if piece.color(selected_piece[0]) == piece.white:
-                                if curr_state.white_kingside_castling and new_position[1] == 62:
-                                    
-                                    curr_state.move_piece((piece.white | piece.rook, 63), (-1, 61))
-
-                                    curr_state.white_kingside_castling = 0
-
-                                elif curr_state.white_queenside_castling and new_position[1] == 58:
-
-                                    curr_state.move_piece((piece.white | piece.rook, 56), (-1, 59))
-
-                                    curr_state.white_queenside_castling = 0
-                                    
-                                curr_state.white_kingmoved = 1
-                            elif piece.color(selected_piece[0]) == piece.black:
-                                if curr_state.black_kingside_castling and new_position[1] == 6:
-
-                                    curr_state.move_piece((piece.black | piece.rook, 7), (-1, 5))
-
-                                    curr_state.black_kingside_castling = 0
-
-                                elif curr_state.black_queenside_castling and new_position[1] == 2:
-
-                                    curr_state.move_piece((piece.black | piece.rook, 0), (-1, 3))
-
-                                    curr_state.black_queenside_castling = 0
-
-
-                                curr_state.black_kingmoved = 1
-
-                        if piece.rank(selected_piece[0]) == piece.rook:
-                            if piece.color(selected_piece[0]) == piece.white:
-                                if selected_piece[1] % 8:
-                                    curr_state.white_queensiderook = 1
-                                elif (selected_piece[1] + 1) % 8:
-                                    curr_state.white_kingsiderook = 1
-                            
-                            if piece.color(selected_piece[0]) == piece.black:
-                                if selected_piece[1] % 8:
-                                    curr_state.black_queensiderook = 1
-                                elif (selected_piece[1] + 1) % 8:
-                                    curr_state.black_kingsiderook = 1
-                        
-                            print(curr_state.en_passant)
-                        
-
-                        
-                        
-                        curr_state.set_possible_moves()
-                        curr_state.checkmate()
-
-                        if curr_state.white_checkmate:
-                            running = False
-                            print("white_checkmate")
-                        if curr_state.black_checkmate:
-                            running = False
-                            print("black_checkmate")
-
-                        
-                        curr_state.switch_turn()
-
-                        
-                        selected_piece = None
                         moves = None
+
 
                     elif new_position[1] == selected_piece[1]:
                         curr_state.board[selected_piece[1]] = -1
@@ -222,6 +130,10 @@ def main():
             o_p=(curr_state.board[var_mov[0]],var_mov[0])
             n_p=(curr_state.board[var_mov[1]],var_mov[1])
             curr_state.move_piece(o_p,n_p)
+
+            o_p =setup_variables(o_p, n_p, curr_state)
+            
+            moves = None
 
             print_move(curr_state.board[var_mov[0]], var_mov[1])
                         
@@ -235,6 +147,105 @@ def main():
 
         clock.tick(MAX_FPS)
         p.display.flip()
+
+def setup_variables(selected_piece, new_position, curr_state):
+    if piece.rank(selected_piece[0]) == piece.pawn:
+
+        if piece.color(selected_piece[0]) == piece.white:
+            if new_position[1] // DIMENSION == 4:     
+                curr_state.en_passant = new_position[1]
+            if new_position[1] // DIMENSION == 0:
+
+                curr_state.piece_indices[selected_piece[0]].remove(new_position[1])
+
+                selected_piece = (piece.white | piece.queen, selected_piece[1])
+
+                curr_state.piece_indices[selected_piece[0]].append(new_position[1])
+
+                curr_state.board[new_position[1]] = selected_piece[0]
+
+        elif piece.color(selected_piece[0]) == piece.black:
+            if new_position[1] // DIMENSION == 3: 
+                curr_state.en_passant = new_position[1]
+            if new_position[1] // DIMENSION == 7:
+                curr_state.piece_indices[selected_piece[0]].remove(new_position[1])
+
+                selected_piece = (piece.black | piece.queen, selected_piece[1])
+
+                curr_state.piece_indices[selected_piece[0]].append(new_position[1])
+
+                curr_state.board[new_position[1]] = selected_piece[0]
+
+    curr_state.en_passant = None
+
+
+
+    if piece.rank(selected_piece[0]) == piece.king:
+
+        if piece.color(selected_piece[0]) == piece.white:
+            if curr_state.white_kingside_castling and new_position[1] == 62:
+
+                curr_state.move_piece((piece.white | piece.rook, 63), (-1, 61))
+
+                curr_state.white_kingside_castling = 0
+
+            elif curr_state.white_queenside_castling and new_position[1] == 58:
+
+                curr_state.move_piece((piece.white | piece.rook, 56), (-1, 59))
+
+                curr_state.white_queenside_castling = 0
+
+            curr_state.white_kingmoved = 1
+        elif piece.color(selected_piece[0]) == piece.black:
+            if curr_state.black_kingside_castling and new_position[1] == 6:
+
+                curr_state.move_piece((piece.black | piece.rook, 7), (-1, 5))
+
+                curr_state.black_kingside_castling = 0
+
+            elif curr_state.black_queenside_castling and new_position[1] == 2:
+
+                curr_state.move_piece((piece.black | piece.rook, 0), (-1, 3))
+
+                curr_state.black_queenside_castling = 0
+
+
+            curr_state.black_kingmoved = 1
+
+    if piece.rank(selected_piece[0]) == piece.rook:
+        if piece.color(selected_piece[0]) == piece.white:
+            if selected_piece[1] % 8:
+                curr_state.white_queensiderook = 1
+            elif (selected_piece[1] + 1) % 8:
+                curr_state.white_kingsiderook = 1
+
+        if piece.color(selected_piece[0]) == piece.black:
+            if selected_piece[1] % 8:
+                curr_state.black_queensiderook = 1
+            elif (selected_piece[1] + 1) % 8:
+                curr_state.black_kingsiderook = 1
+
+        print(curr_state.en_passant)
+
+
+
+
+    curr_state.set_possible_moves()
+    curr_state.checkmate()
+
+    if curr_state.white_checkmate:
+        running = False
+        print("white_checkmate")
+    if curr_state.black_checkmate:
+        running = False
+        print("black_checkmate")
+
+
+    curr_state.switch_turn()
+
+
+    selected_piece = None
+    return selected_piece
 
 
 

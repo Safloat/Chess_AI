@@ -53,7 +53,6 @@ class game_state:
         #self.possible_moves=defaultdict(list)
         self.board = deepcopy(board)
         
-        print(self.board)
         
         #white_castling_info
         self.white_kingmoved=white_kingmoved
@@ -114,7 +113,6 @@ class game_state:
         for i in range(32):
             self.board[self.piece_indices[i]] = i
         
-        print(self.board)
 
     def switch_turn(self):
         self.turn = piece.opposite_color(self.turn)
@@ -534,7 +532,6 @@ class game_state:
                     
                     moves = temp_castling_moves = self.get_valid_moves((_piece, position))
                     if piece.rank(_piece) in [piece.rook, piece.queen, piece.bishop]:
-                        print(moves)
                         temp_castling_moves = list(chain.from_iterable(temp_castling_moves[1]))
                         for move in moves[1]:
                             all_moves.append((moves[0], move)) 
@@ -573,27 +570,20 @@ class game_state:
         self.white_queenside_under_attack = 0
 
         if color == piece.white:
-            print("castling white check")
             for move in moves:
                 if move in [1, 2, 3]:
-                    print("castling black queenside under attack")
                     self.black_queenside_under_attack = 1
                 elif move in [5, 6]:
-                    print("castling black kingside under attack")
                     self.black_kingside_under_attack = 1
         
         elif color == piece.black:
-            print("castling black check")
 
             for move in moves:
                 if move in [57, 58, 59]:
-                    print("castling white queenside under attack")
                     self.white_queenside_under_attack = 1
                 elif move in [61, 62]:
-                    print("castling white kingside under attack")
                     self.white_kingside_under_attack = 1
 
-        print(moves)
 
 
     def add_castling_moves(self, color, val_moves):
@@ -622,7 +612,6 @@ class game_state:
     def evaluate_checkmate(self, color):
         
         if color == piece.white:
-            print(self.black_moves)
             for moves in self.black_moves:
                 
                 for move in moves[1]:
@@ -691,7 +680,6 @@ class game_state:
         
         
         if color == piece.white:
-            print(self.black_moves)
             for moves in self.black_moves:
                 
                 for move in moves[1]:

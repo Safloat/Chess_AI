@@ -20,8 +20,10 @@ def minimaxRoot(depth, curr_state, isMaximizing, turn):
     for moves in possibleMoves:
         for move in moves[1]:   #loop over all possible moves for each set of moves 
             possible_state = deepcopy(curr_state)   #create a deep copy of the current state
-            possible_state.move_piece((curr_state.board[moves[0]], moves[0]), (curr_state.board[move], move))   #make a move on the possible state
+            possible_state.move_piece((possible_state.board[moves[0]], moves[0]), (possible_state.board[move], move))   #make a move on the possible state
             
+            possible_state.set_possible_moves()
+
             value = max(bestMove, minimax(depth - 1, possible_state, -10000, 10000, not isMaximizing, piece.opposite_color(turn)))
 
             if(value > bestMove):
@@ -34,7 +36,7 @@ def minimaxRoot(depth, curr_state, isMaximizing, turn):
 
 def minimax(depth, curr_state, alpha, beta, is_maximizing, turn):
     if(depth == 0):
-        return -evaluation(curr_state)
+        return -evaluation(curr_state, turn)
     
     if turn==piece.white:
         possibleMoves=curr_state.white_moves
@@ -46,7 +48,10 @@ def minimax(depth, curr_state, alpha, beta, is_maximizing, turn):
         for moves in possibleMoves:
             for move in moves[1]:
                 possible_state = deepcopy(curr_state)   #create a deep copy of the current state
-                possible_state.move_piece((curr_state.board[moves[0]], moves[0]), (curr_state.board[move], move))
+                possible_state.move_piece((possible_state.board[moves[0]], moves[0]), (possible_state.board[move], move))
+
+                possible_state.set_possible_moves()
+
                 bestMove = max(bestMove,minimax(depth - 1,possible_state,alpha,beta, not is_maximizing, piece.opposite_color(turn)))
                 alpha = max(alpha,bestMove)
                 if beta <= alpha:
@@ -57,7 +62,9 @@ def minimax(depth, curr_state, alpha, beta, is_maximizing, turn):
         for moves in possibleMoves:
             for move in moves[1]:
                 possible_state = deepcopy(curr_state)   #create a deep copy of the current state
-                possible_state.move_piece((curr_state.board[moves[0]], moves[0]), (curr_state.board[move], move))
+                possible_state.move_piece((possible_state.board[moves[0]], moves[0]), (possible_state.board[move], move))
+
+                possible_state.set_possible_moves()
                 
                 bestMove = min(bestMove, minimax(depth - 1, possible_state,alpha,beta, not is_maximizing, piece.opposite_color(turn)))
         
@@ -73,11 +80,11 @@ def evaluation(curr_state, turn):
     return evaluation
 
 
-def getPieceValue(piece):
-    if(piece == -1):
+def getPieceValue(_piece):
+    if(_piece == -1):
         return 0
     value = 0
-    rank = piece.rank(piece)
+    rank = piece.rank(_piece)
     if rank == piece.pawn:
         value = 10
     if rank == piece.knight:
