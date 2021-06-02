@@ -5,11 +5,6 @@ from itertools import chain
 
 
 
-class piece_move_list:
-
-    def __init__(self, position, moves = []):
-        self.position = position
-        self.moves = moves 
 
 class piece:
 
@@ -123,6 +118,8 @@ class game_state:
 
     def switch_turn(self):
         self.turn = piece.opposite_color(self.turn)
+
+#-------------------------------------------------------- MOVE CALCULATION
     def pawnmoves(self, pos, color):
 
         val_mov=[]
@@ -131,25 +128,25 @@ class game_state:
 
                 
                 
-                if pos < 56:
+                if pos < 56:    #forward move
                     if self.board[pos + 8] < 0:
                         val_mov.append(pos+8)
                         if pos // 8 == 1:
                             if self.board[pos + 16] < 0:
                                 val_mov.append(pos+16)
                     
-                    if pos % 8:
+                    if pos % 8: #left move
                         if self.board[pos + 7] >= 0 and piece.is_enemy(self.board[pos + 7], color): 
                             
                                 val_mov.append(pos+7)
-                    if (pos + 1)%8:                   
+                    if (pos + 1)%8: #right move      
                         if self.board[pos + 9] >= 0 and piece.is_enemy(self.board[pos + 9], color):
                             
                                 val_mov.append(pos+9)
                 
 
 
-                if pos // 8 == 4:
+                if pos // 8 == 4:   #en_passant check on specific row
                     if pos % 8:
                         if self.en_passant and pos - 1 == self.en_passant:
                             val_mov.append(pos - 1)
@@ -157,6 +154,8 @@ class game_state:
                         if self.en_passant and pos + 1 == self.en_passant:
                             val_mov.append(pos + 1)
                     
+            
+            #same things mirrored for white
             if color == piece.white:
                 
                 if pos > 7:
@@ -478,7 +477,8 @@ class game_state:
 
         return self.verification_of_moves(color, val_moves)
 
-
+    
+    #move a piece from one position to another
     def move_piece(self, selected_piece, possible_piece):
         self.board[selected_piece[1]] = -1
         self.board[possible_piece[1]] = selected_piece[0]
@@ -488,26 +488,8 @@ class game_state:
             self.piece_indices[possible_piece[0]].remove(possible_piece[1])
 
 
-    def add_castling_moves(self, color, val_moves):
-        
-        if color == piece.white:
-            if self.white_kingside_castling:
-                if self.board[61] + self.board[62] < -1:
-                    val_moves.append(62)
-                
-            if self.white_queenside_castling:
-                if self.board[57] + self.board[58] + self.board[59] < -2:
-                    val_moves.append(59)  
-        
-        else:
-            if self.black_kingside_castling:
-                if self.board[5] + self.board[6] < -1:
-                    val_moves.append(6)
-                
-            if self.black_queenside_castling:
-                if self.board[1] + self.board[2] + self.board[3] < -2:
-                    val_moves.append(3)  
-
+    
+    #verify whether a set of moves is valid
     def verification_of_moves(self, color, moves):
         
         valid_moves = []
@@ -517,7 +499,67 @@ class game_state:
                 valid_moves.append(move)
         
         return valid_moves
-                
+
+
+    #get valid moves for a piece
+    def get_valid_moves(self, selected_piece):
+
+        if selected_piece:
+            if piece.rank(selected_piece[0]) == piece.king:
+                moves = self.kingmoves(selected_piece[1], piece.color(selected_piece[0]))
+            elif piece.rank(selected_piece[0]) == piece.queen:
+                moves = self.queenmoves(selected_piece[1], piece.color(selected_piece[0]))
+            elif piece.rank(selected_piece[0]) == piece.rook:
+                moves = self.rookmoves(selected_piece[1], piece.color(selected_piece[0]))
+            elif piece.rank(selected_piece[0]) == piece.bishop:
+                moves = self.bishopmoves(selected_piece[1], piece.color(selected_piece[0]))
+            elif piece.rank(selected_piece[0]) == piece.knight:
+                moves = self.knightmoves(selected_piece[1], piece.color(selected_piece[0]))
+            elif piece.rank(selected_piece[0]) == piece.pawn:
+                moves = self.pawnmoves(selected_piece[1], piece.color(selected_piece[0]))
+            
+        return selected_piece[1], moves #return moves with starting position
+
+    #get all valid moves for a team
+    def get_all_valid_moves(self, turn, check_castling = True):
+
+        all_moves = []
+        for _piece, positions in self.piece_indices.items():
+            color = piece.color(_piece)
+            if color == turn:
+                for position in positions:
+                    
+                    moves = temp_castling_moves = self.get_valid_moves((_piece, position))
+                    if piece.rank(_piece) in [piece.rook, piece.queen, piece.bishop]:
+                        print(moves)
+                        temp_castling_moves = list(chain.from_iterable(temp_castling_moves[1]))
+                        for move in moves[1]:
+                            all_moves.append((moves[0], move)) 
+                    else:
+                        temp_castling_moves = temp_castling_moves[1]
+                        all_moves.append(moves)
+
+                    if check_castling:
+                        self.castling_under_attack(temp_castling_moves, piece.opposite_color(color))
+        
+        return all_moves
+
+    
+
+
+    def set_possible_moves(self):
+        
+        self.white_moves.clear()
+        
+        for move in self.get_all_valid_moves(piece.white):
+            self.white_moves.append(move)
+
+        self.black_moves.clear()
+
+        for move in self.get_all_valid_moves(piece.black):
+            self.black_moves.append(move)
+
+#------------------------------------------------------------ CASTLING CALCULATIONS
     def castling_under_attack(self, moves, color):
 
         
@@ -550,7 +592,30 @@ class game_state:
 
         print(moves)
 
-    #checks if a set of moves is checkmating the given color's king
+
+    def add_castling_moves(self, color, val_moves):
+        
+        if color == piece.white:
+            if self.white_kingside_castling:
+                if self.board[61] + self.board[62] < -1:
+                    val_moves.append(62)
+                
+            if self.white_queenside_castling:
+                if self.board[57] + self.board[58] + self.board[59] < -2:
+                    val_moves.append(59)  
+        
+        else:
+            if self.black_kingside_castling:
+                if self.board[5] + self.board[6] < -1:
+                    val_moves.append(6)
+                
+            if self.black_queenside_castling:
+                if self.board[1] + self.board[2] + self.board[3] < -2:
+                    val_moves.append(3)  
+
+
+#---------------------------------------------------------------CHECKMATING
+    #checks if the opposite team is checkmating the given color's king
     def evaluate_checkmate(self, color):
         
         if color == piece.white:
@@ -574,26 +639,13 @@ class game_state:
         return False
 
 
-     
-    '''    
-    def is_checkmating(color, defender):
-
-        moves = self.get_all_valid_moves(color, False)
-
-        return self.evaluate_checkmate(piece.opposite_color(color), moves)     
-        
-    '''
-    def endgame_check(self, _piece, defender_moves, attacker_moves): #where pos is attacker position colr is colour of king
+    #reset checkmate variable if the king can escape
+    def endgame_check(self, _piece, defender_moves, attacker_moves): 
     
         
         color = piece.color(_piece[0])
         escape_moves = self.kingmoves(_piece[1], color, True)
 
-
-
-        
-
-    #check if king can move out of the way, just get lists of valid king movescompare them with enemy colour's valid moves, pop out the moves that put king under attack
       
         if escape_moves:
 
@@ -615,12 +667,7 @@ class game_state:
             else:
                 self.black_checkmate = 0
             return
-        # else:
-        #     if defender_moves
-
-       #if list is not empty
-            #self.colour_checkmate=0
-            #return
+     
         else:
             if len(self.checkmating_moves) < 2:
                 
@@ -635,17 +682,8 @@ class game_state:
                 
                 return
             
-        #else
-            #check if king can attack the piece that can kill it
-                #if yes then checkmate=0
-                #return
-            #if no
-                #check all friend pieces if attacker position can be reached by some other friend piece
-                    #if yes= move the piece
-                        #checkmate=0
-                    #if no
-                        #return checkmate=1
 
+    #check if any piece is under attack and fill checkmating moves if needed
     def check_under_attack(self, color, defender_position, fill_checkmating_moves = False):
         
         
@@ -668,84 +706,13 @@ class game_state:
 
         return False
         
-    def get_all_valid_moves(self, turn, check_castling = True):
+    
 
-        all_moves = []
-        for _piece, positions in self.piece_indices.items():
-            color = piece.color(_piece)
-            if color == turn:
-                for position in positions:
-                    
-                    moves = temp_castling_moves = self.get_valid_moves((_piece, position))
-                    if piece.rank(_piece) in [piece.rook, piece.queen, piece.bishop]:
-                        print(moves)
-                        temp_castling_moves = list(chain.from_iterable(temp_castling_moves[1]))
-                        for move in moves[1]:
-                            all_moves.append((moves[0], move)) 
-                    else:
-                        temp_castling_moves = temp_castling_moves[1]
-                        all_moves.append(moves)
-
-                    if check_castling:
-                        self.castling_under_attack(temp_castling_moves, piece.opposite_color(color))
-        
-        return all_moves
-
-    def get_valid_moves(self, selected_piece):
-
-        if selected_piece:
-            if piece.rank(selected_piece[0]) == piece.king:
-                moves = self.kingmoves(selected_piece[1], piece.color(selected_piece[0]))
-            elif piece.rank(selected_piece[0]) == piece.queen:
-                moves = self.queenmoves(selected_piece[1], piece.color(selected_piece[0]))
-            elif piece.rank(selected_piece[0]) == piece.rook:
-                moves = self.rookmoves(selected_piece[1], piece.color(selected_piece[0]))
-            elif piece.rank(selected_piece[0]) == piece.bishop:
-                moves = self.bishopmoves(selected_piece[1], piece.color(selected_piece[0]))
-            elif piece.rank(selected_piece[0]) == piece.knight:
-                moves = self.knightmoves(selected_piece[1], piece.color(selected_piece[0]))
-            elif piece.rank(selected_piece[0]) == piece.pawn:
-                moves = self.pawnmoves(selected_piece[1], piece.color(selected_piece[0]))
-            
-        return selected_piece[1], moves
-
-
-    def set_possible_moves(self):
-        
-        self.white_moves.clear()
-        
-        for move in self.get_all_valid_moves(piece.white):
-            self.white_moves.append(move)
-
-        self.black_moves.clear()
-
-        for move in self.get_all_valid_moves(piece.black):
-            self.black_moves.append(move)
-
-
+    #checkmate evaluation for both teams
     def checkmate(self):
 
 
         self.evaluate_checkmate(piece.white)
         self.evaluate_checkmate(piece.black)
 
-        
-'''     
-    def check_castling(pos, color):
-        res=[]
-        if color == piece.white:
-            #for kingside
-             if self.white_kingmoved==0 and self.white_kingsiderook==0 and self.curr_board[62]<0 and self.curr_board[61]<0:
-                 res.append("kingside")
-             if self.white_kingmoved==0 and self.white_queensiderook==0 and self.curr_board[59]<0 and self.curr_board[58]<0 and self.curr_board[57]<0:
-                 res.append("queenside")
-        
-        if color == piece.black:
-            #for kingside
-             if self.black_kingmoved==0 and self.black_kingsiderook==0 and self.curr_board[5]<0 and self.curr_board[6]<0:
-                 res.append("kingside")
-             if self.black_kingmoved==0 and self.black_queensiderook==0 and self.curr_board[1]<0 and self.curr_board[2]<0 and self.curr_board[3]<0:
-                 res.append("queenside")
-
-        return res
-'''
+    
