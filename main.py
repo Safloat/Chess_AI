@@ -79,17 +79,17 @@ def main():
 
     while running:
         
-        possible_piece = get_square_under_mouse(curr_state.board)
+        new_position = get_square_under_mouse(curr_state.board)
 
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
             if e.type == p.MOUSEBUTTONDOWN:
-                if not curr_state.turn or (selected_piece and curr_state.turn == (piece.color(selected_piece[0]))) or (possible_piece[0] >=0 and curr_state.turn == piece.color(possible_piece[0])):
+                if not curr_state.turn or (selected_piece and curr_state.turn == (piece.color(selected_piece[0]))) or (new_position[0] >=0 and curr_state.turn == piece.color(new_position[0])):
                     if not selected_piece:
                         
-                        if possible_piece[0] >= 0:
-                            selected_piece = possible_piece
+                        if new_position[0] >= 0:
+                            selected_piece = new_position
                             moves = curr_state.get_valid_moves(selected_piece)
                             
                             curr_state.board[selected_piece[1]] = -1
@@ -98,31 +98,43 @@ def main():
                                 curr_state.turn = piece.color(selected_piece[0])
 
 
-                    elif ((possible_piece[0] >= 0 and piece.is_enemy(possible_piece[0], selected_piece[0])) \
-                    or curr_state.board[possible_piece[1]] < 0)\
-                    and possible_piece[1] in moves[1]\
-                    or ((piece.rank(selected_piece[0]) in [piece.rook, piece.bishop, piece.queen] and possible_piece[1] in list(chain.from_iterable(moves[1])))):
+                    elif ((new_position[0] >= 0 and piece.is_enemy(new_position[0], selected_piece[0])) \
+                    or curr_state.board[new_position[1]] < 0)\
+                    and new_position[1] in moves[1]\
+                    or ((piece.rank(selected_piece[0]) in [piece.rook, piece.bishop, piece.queen] and new_position[1] in list(chain.from_iterable(moves[1])))):
                         
 
 
                         
 
-                        curr_state.move_piece(selected_piece, possible_piece)
-
+                        curr_state.move_piece(selected_piece, new_position)
 
                         if piece.rank(selected_piece[0]) == piece.pawn:
 
                             if piece.color(selected_piece[0]) == piece.white:
-                                if possible_piece[1] // DIMENSION == 4:     
-                                    curr_state.en_passant = possible_piece[1]
-                                if possible_piece[1] // DIMENSION == 0:
+                                if new_position[1] // DIMENSION == 4:     
+                                    curr_state.en_passant = new_position[1]
+                                if new_position[1] // DIMENSION == 0:
+
+                                    curr_state.piece_indices[selected_piece[0]].remove(new_position[1])
+                                    
                                     selected_piece = (piece.white | piece.queen, selected_piece[1])
+
+                                    curr_state.piece_indices[selected_piece[0]].append(new_position[1])
+
+                                    curr_state.board[new_position[1]] = selected_piece[0]
                             
                             elif piece.color(selected_piece[0]) == piece.black:
-                                if possible_piece[1] // DIMENSION == 3: 
-                                    curr_state.en_passant = possible_piece[1]
-                                if possible_piece[1] // DIMENSION == 7:
+                                if new_position[1] // DIMENSION == 3: 
+                                    curr_state.en_passant = new_position[1]
+                                if new_position[1] // DIMENSION == 7:
+                                    curr_state.piece_indices[selected_piece[0]].remove(new_position[1])
+                                    
                                     selected_piece = (piece.black | piece.queen, selected_piece[1])
+
+                                    curr_state.piece_indices[selected_piece[0]].append(new_position[1])
+
+                                    curr_state.board[new_position[1]] = selected_piece[0]
                         
                         curr_state.en_passant = None
 
@@ -131,13 +143,13 @@ def main():
                         if piece.rank(selected_piece[0]) == piece.king:
                             
                             if piece.color(selected_piece[0]) == piece.white:
-                                if curr_state.white_kingside_castling and possible_piece[1] == 62:
+                                if curr_state.white_kingside_castling and new_position[1] == 62:
                                     
                                     curr_state.move_piece((piece.white | piece.rook, 63), (-1, 61))
 
                                     curr_state.white_kingside_castling = 0
 
-                                elif curr_state.white_queenside_castling and possible_piece[1] == 58:
+                                elif curr_state.white_queenside_castling and new_position[1] == 58:
 
                                     curr_state.move_piece((piece.white | piece.rook, 56), (-1, 59))
 
@@ -145,13 +157,13 @@ def main():
                                     
                                 curr_state.white_kingmoved = 1
                             elif piece.color(selected_piece[0]) == piece.black:
-                                if curr_state.black_kingside_castling and possible_piece[1] == 6:
+                                if curr_state.black_kingside_castling and new_position[1] == 6:
 
                                     curr_state.move_piece((piece.black | piece.rook, 7), (-1, 5))
 
                                     curr_state.black_kingside_castling = 0
 
-                                elif curr_state.black_queenside_castling and possible_piece[1] == 2:
+                                elif curr_state.black_queenside_castling and new_position[1] == 2:
 
                                     curr_state.move_piece((piece.black | piece.rook, 0), (-1, 3))
 
@@ -182,10 +194,10 @@ def main():
                         curr_state.checkmate()
 
                         if curr_state.white_checkmate:
-                            running=False
+                            running = False
                             print("white_checkmate")
                         if curr_state.black_checkmate:
-                            running=False
+                            running = False
                             print("black_checkmate")
 
                         
@@ -195,16 +207,16 @@ def main():
                         selected_piece = None
                         moves = None
 
-                    elif possible_piece[1] == selected_piece[1]:
+                    elif new_position[1] == selected_piece[1]:
                         curr_state.board[selected_piece[1]] = -1
-                        curr_state.board[possible_piece[1]] = selected_piece[0]
+                        curr_state.board[new_position[1]] = selected_piece[0]
                         selected_piece = None
                         moves = None
 
 
         drawBoard(screen)
         highlightPossibleMoves(screen, moves)
-        drawHighlightedSquare(screen, possible_piece[1])
+        drawHighlightedSquare(screen, new_position[1])
         drawPieces(screen, curr_state.board)
         drawSelectedPiece(screen, selected_piece)
 

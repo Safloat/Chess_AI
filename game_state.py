@@ -135,11 +135,11 @@ class game_state:
                             if self.board[pos + 16] < 0:
                                 val_mov.append(pos+16)
                     
-                    if pos % 8: #left move
-                        if self.board[pos + 7] >= 0 and piece.is_enemy(self.board[pos + 7], color): 
+                    if pos % 8: #left diagonal move
+                        if self.board[pos + 7] >= 0 and piece.is_enemy(self.board[pos + 7], color):   #only attack if the piece at diagonal is enemy
                             
                                 val_mov.append(pos+7)
-                    if (pos + 1)%8: #right move      
+                    if (pos + 1)%8: #right diagonal move      
                         if self.board[pos + 9] >= 0 and piece.is_enemy(self.board[pos + 9], color):
                             
                                 val_mov.append(pos+9)
@@ -479,13 +479,16 @@ class game_state:
 
     
     #move a piece from one position to another
-    def move_piece(self, selected_piece, possible_piece):
-        self.board[selected_piece[1]] = -1
-        self.board[possible_piece[1]] = selected_piece[0]
-        self.piece_indices[selected_piece[0]].remove(selected_piece[1])
-        self.piece_indices[selected_piece[0]].append(possible_piece[1])
-        if possible_piece[0] >= 0:
-            self.piece_indices[possible_piece[0]].remove(possible_piece[1])
+    def move_piece(self, old_position, new_position):
+
+        #both input parameters are tuples of the format (piece, position)
+        self.board[old_position[1]] = -1    #set piece at old position on board to -1 i.e: empty
+        self.board[new_position[1]] = old_position[0]   #set piece at new position to the one at old position
+        self.piece_indices[old_position[0]].remove(old_position[1]) #remove the old position of the piece from the corresponding list 
+        self.piece_indices[old_position[0]].append(new_position[1]) #add the new position of the piece to the list
+        
+        if new_position[0] >= 0:
+            self.piece_indices[new_position[0]].remove(new_position[1]) #remove the position of the captured piece from its list if there was one
 
 
     
@@ -495,7 +498,7 @@ class game_state:
         valid_moves = []
         
         for move in moves:
-            if not (self.board[move] >= 0 and not piece.is_enemy(self.board[move],color)):
+            if not (self.board[move] >= 0 and not piece.is_enemy(self.board[move],color)):  #
                 valid_moves.append(move)
         
         return valid_moves
