@@ -1,4 +1,5 @@
 import pygame as p
+import ABPruning
 from game_state import piece
 from game_state import game_state
 from itertools import chain
@@ -81,11 +82,14 @@ def main():
         
         new_position = get_square_under_mouse(curr_state.board)
 
-        for e in p.event.get():
-            if e.type == p.QUIT:
-                running = False
-            if e.type == p.MOUSEBUTTONDOWN:
-                if not curr_state.turn or (selected_piece and curr_state.turn == (piece.color(selected_piece[0]))) or (new_position[0] >=0 and curr_state.turn == piece.color(new_position[0])):
+        if not curr_state.turn or curr_state.turn == player_turn:#(selected_piece and curr_state.turn == (piece.color(selected_piece[0]))) or (new_position[0] >=0 and curr_state.turn == piece.color(new_position[0])):
+
+            for e in p.event.get():
+                if e.type == p.QUIT:
+                    running = False
+                
+
+                if e.type == p.MOUSEBUTTONDOWN:
                     if not selected_piece:
                         
                         if new_position[0] >= 0:
@@ -96,6 +100,7 @@ def main():
 
                             if not curr_state.turn:
                                 curr_state.turn = piece.color(selected_piece[0])
+                                player_turn = curr_state.turn
 
 
                     elif ((new_position[0] >= 0 and piece.is_enemy(new_position[0], selected_piece[0])) \
@@ -212,7 +217,14 @@ def main():
                         curr_state.board[new_position[1]] = selected_piece[0]
                         selected_piece = None
                         moves = None
+        else:
+            var_mov=ABPruning.minimaxRoot(3, curr_state, True,curr_state.turn)
+            o_p=(curr_state.board[var_mov[0]],var_mov[0])
+            n_p=(curr_state.board[var_mov[1]],var_mov[1])
+            curr_state.move_piece(o_p,n_p)
 
+            print_move(curr_state.board[var_mov[0]], var_mov[1])
+                        
 
         drawBoard(screen)
         highlightPossibleMoves(screen, moves)
@@ -228,7 +240,25 @@ def main():
 
 
 
-
+def print_move(_piece, position):
+    rank = piece.rank(_piece)
+    
+    if rank == piece.pawn:
+        print("PAWN TO ")
+    if rank == piece.knight:
+        print("KNIGHT TO ")
+    if rank == piece.bishop:
+        print("BISHOP TO ")
+    if rank == piece.rook:
+        print("ROOK TO ")
+    if rank == piece.queen:
+        print("QUEEN TO ")
+    if rank == piece.king:
+        print("KING TO ")
+    
+    string =  chr(48 + position%8) + chr(position // 8)
+    print()
+    
 
 def highlightPossibleMoves(screen, moves):
 

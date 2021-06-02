@@ -92,7 +92,3 @@ def getPieceValue(piece):
         value = 900
     #value = value if (board.piece_at(place)).color else -value
     return value
-
-
-
-_
