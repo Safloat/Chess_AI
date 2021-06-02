@@ -108,8 +108,6 @@ def main():
                         
 
                         curr_state.move_piece(selected_piece, possible_piece)
-                        
-                        curr_state.en_passant = None
 
                         if piece.rank(selected_piece[0]) == piece.pawn:
 
@@ -117,13 +115,17 @@ def main():
                                 if possible_piece[1] // DIMENSION == 4:     
                                     curr_state.en_passant = possible_piece[1]
                                 if possible_piece[1] // DIMENSION == 0:
-                                    selected_piece = (piece.white | piece.queen, possible_piece[1])
+                                    selected_piece = (piece.white | piece.queen, selected_piece[1])
                             
                             elif piece.color(selected_piece[0]) == piece.black:
                                 if possible_piece[1] // DIMENSION == 3: 
                                     curr_state.en_passant = possible_piece[1]
                                 if possible_piece[1] // DIMENSION == 7:
-                                    selected_piece = (piece.black | piece.queen, possible_piece[1])
+                                    selected_piece = (piece.black | piece.queen, selected_piece[1])
+                        
+                        curr_state.en_passant = None
+
+                        
                         
                         if piece.rank(selected_piece[0]) == piece.king:
                             

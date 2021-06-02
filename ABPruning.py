@@ -1,76 +1,127 @@
-##########################
-###### MINI-MAX A-B ######
-##########################
 
-class AlphaBeta:
-    # print utility value of root node (assuming it is max)
-    # print names of all nodes visited during search
-    def __init__(self, game_tree):
-        self.game_tree = game_tree  # GameTree
-        self.root = game_tree.root  # GameNode
-        return
+import math
+import random
+import sys
 
-    def alpha_beta_search(self, node):
+
+
+def minimaxRoot(depth, board,isMaximizing):
     
-        best_val = float('-inf')
-        beta = float('inf')
+    possibleMoves = board.legal_moves
+    bestMove = -9999
+    bestMoveFinal = None
+    for x in possibleMoves:
+        move = chess.Move.from_uci(str(x))
+        board.push(move)
+        value = max(bestMove, minimax(depth - 1, board,-10000,10000, not isMaximizing))
+        board.pop()
+        if( value > bestMove):
+            print("Best score: " ,str(bestMove))
+            print("Best move: ",str(bestMoveFinal))
+            bestMove = value
+            bestMoveFinal = move
+    return bestMoveFinal
 
-        successors = self.getSuccessors(node)
-        best_state = None
-        for state in successors:
-            value = self.min_value(state, best_val, beta)
-            if value > best_val:
-                best_val = value
-                best_state = state
-        print ("AlphaBeta:  Utility Value of Root Node: = " + str(best_val))
-        print ("AlphaBeta:  Best State is: " + best_state.Name)
-        return best_state
+def minimax(depth, board, alpha, beta, is_maximizing):
+    if(depth == 0):
+        return -evaluation(board)
+    possibleMoves = board.legal_moves
+    if(is_maximizing):
+        bestMove = -9999
+        for x in possibleMoves:
+            move = chess.Move.from_uci(str(x))
+            board.push(move)
+            bestMove = max(bestMove,minimax(depth - 1, board,alpha,beta, not is_maximizing))
+            board.pop()
+            alpha = max(alpha,bestMove)
+            if beta <= alpha:
+                return bestMove
+        return bestMove
+    else:
+        bestMove = 9999
+        for x in possibleMoves:
+            move = chess.Move.from_uci(str(x))
+            board.push(move)
+            bestMove = min(bestMove, minimax(depth - 1, board,alpha,beta, not is_maximizing))
+            board.pop()
+            beta = min(beta,bestMove)
+            if(beta <= alpha):
+                return bestMove
+        return bestMove
 
-    def max_value(self, node, alpha, beta):
-        print ("AlphaBeta–>MAX: Visited Node :: " + node.Name)
-        if self.isTerminal(node):
-            return self.getUtility(node)
-        infinity = float('inf')
-        value = float('-inf')
 
-        successors = self.getSuccessors(node)
-        for state in successors:
-            value = max(value, self.min_value(state, alpha, beta))
-            if value >= beta:
-                return value
-            alpha = max(alpha, value)
-        return value
+def calculateMove(board):
+    possible_moves = board.legal_moves
+    if(len(possible_moves) == 0):
+        print("No more possible moves...Game Over")
+        sys.exit()
+    bestMove = None
+    bestValue = -9999
+    n = 0
+    for x in possible_moves:
+        move = chess.Move.from_uci(str(x))
+        board.push(move)
+        boardValue = -evaluation(board)
+        board.pop()
+        if(boardValue > bestValue):
+            bestValue = boardValue
+            bestMove = move
 
-    def min_value(self, node, alpha, beta):
-        print ("AlphaBeta–>MIN: Visited Node :: " + node.Name)
-        if self.isTerminal(node):
-            return self.getUtility(node)
-        infinity = float('inf')
-        value = infinity
+    return bestMove
 
-        successors = self.getSuccessors(node)
-        for state in successors:
-            value = min(value, self.max_value(state, alpha, beta))
-            if value <= alpha:
-                return value
-            beta = min(beta, value)
+def evaluation(board):
+    i = 0
+    evaluation = 0
+    x = True
+    try:
+        x = bool(board.piece_at(i).color)
+    except AttributeError as e:
+        x = x
+    while i < 63:
+        i += 1
+        evaluation = evaluation + (getPieceValue(str(board.piece_at(i))) if x else -getPieceValue(str(board.piece_at(i))))
+    return evaluation
 
-        return value
-    #                     #
-    #   UTILITY METHODS   #
-    #                     #
 
-    # successor states in a game tree are the child nodes…
-    def getSuccessors(self, node):
-        assert node is not None
-        return node.children
+def getPieceValue(piece):
+    if(piece == None):
+        return 0
+    value = 0
+    if piece == "P" or piece == "p":
+        value = 10
+    if piece == "N" or piece == "n":
+        value = 30
+    if piece == "B" or piece == "b":
+        value = 30
+    if piece == "R" or piece == "r":
+        value = 50
+    if piece == "Q" or piece == "q":
+        value = 90
+    if piece == 'K' or piece == 'k':
+        value = 900
+    #value = value if (board.piece_at(place)).color else -value
+    return value
 
-    # return true if the node has NO children (successor states)
-    # return false if the node has children (successor states)
-    def isTerminal(self, node):
-        assert node is not None
-        return len(node.children) == 0
+def main():
+    board = chess.Board()
+    n = 0
+    print(board)
+    while n < 100:
+        if n%2 == 0:
+            move = input("Enter move: ")
+            move = chess.Move.from_uci(str(move))
+            board.push(move)
+        else:
+            print("Computers Turn:")
+            move = minimaxRoot(3,board,True)
+            move = chess.Move.from_uci(str(move))
+            board.push(move)
+        print(board)
+        n += 1
 
-    def getUtility(self, node):
-        assert node is not None
-        return node.value
+
+
+
+
+if _name_ == "_main_":
+    main()
